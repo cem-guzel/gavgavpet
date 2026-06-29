@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "@uploadthing/react/styles.css";
 import "./globals.css";
 import { Toaster } from "sonner";
-  import Chatbot from '@/components/chatbot';
 import { Playfair_Display, Lato } from "next/font/google";
 import Loader from "@/components/Loader";
 
@@ -118,7 +117,6 @@ export default function RootLayout({
         <Loader />
         {children}
         <Toaster position="top-right" theme="dark" />
-        <Chatbot />
       </body>
     </html>
   );

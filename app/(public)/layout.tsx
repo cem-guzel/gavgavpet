@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-
+import ContactFAB from '@/components/ContactFAB';
 
 export const metadata: Metadata = {
   title: "Pet Kuaför Sarıyer & Maslak | GavgavPet – Premium Köpek ve Kedi Bakımı",
@@ -20,8 +19,7 @@ export default function PublicLayout({
       <main className="flex-grow w-full">
         {children}
       </main>
-
-      <FloatingWhatsApp />
+<ContactFAB />
     </>
   );
 }
