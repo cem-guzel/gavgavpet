@@ -29,6 +29,14 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
+   --color-paper: #FDFBF7;
+  --color-dusty-rose: #DCCFCF;
+  --color-dusty-dark: #B09E9E;
+  --color-rich-black: #1B1B1B;
+   --color-rose-deep: #C08282;
+  --color-rose-deep-dark: #A66B6B;
+
+ 
   --radius: 0.5rem;
 }
 @keyframes marquee {
