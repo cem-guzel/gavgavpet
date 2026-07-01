@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { Playfair_Display, Lato } from "next/font/google";
 import Loader from "@/components/Loader";
+import { Analytics } from "@vercel/analytics/next"
 
 // 1. DEĞİŞİKLİK: Türkçe karakter sorunu için "latin-ext" eklendi
 const playfair = Playfair_Display({
@@ -117,6 +118,7 @@ export default function RootLayout({
         <Loader />
         {children}
         <Toaster position="top-right" theme="dark" />
+        <Analytics />
       </body>
     </html>
   );
