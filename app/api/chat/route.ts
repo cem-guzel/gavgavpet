@@ -2,6 +2,7 @@ import { groq } from '@ai-sdk/groq';
 import { streamText, tool, convertToModelMessages, stepCountIs } from 'ai'; 
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { searchKnowledge } from '@/lib/embeddings';
 
 export const maxDuration = 30;
 
@@ -19,38 +20,6 @@ GERÇEK İŞLETME BİLGİLERİ (sadece bunları kullan, başka bilgi üretme):
 - Web sitesi: gavgavpet.com
 - SSS sayfası: gavgavpet.com/sss
 
-SIKÇA SORULAN SORULAR VE CEVAPLARI:
-
-[Konum & Randevu]
-- GavgavPet nerede bulunuyor? → Maslak 1453 Sitesi, T4B Blok, -4. Kat, No: 213, Sarıyer / İstanbul adresindeyiz. Maslak, Levent, Ayazağa ve İstinye'den kolayca ulaşılır.
-- Çalışma saatleriniz nedir? → Haftanın 7 günü 09:00–19:00. Randevu için +90 536 899 43 74'ü arayabilir ya da WhatsApp'tan yazabilirsiniz.
-- Sarıyer/Maslak dışından hizmet veriyor musunuz? → Evet, Levent, Ayazağa, İstinye, Tarabya, Büyükdere gibi çevre semtlerden gelenleri de ağırlıyoruz.
-- Randevu almak zorunlu mu? → Evet, yalnızca randevulu çalışıyoruz; her dostumuza birebir ilgi gösterebilmek için.
-
-[Bakım Süreci]
-- Bakım süresi ne kadar sürer? → Irk, tüy yapısı ve hizmete göre değişir; ortalama tam bakım (banyo + tıraş + tırnak) 1–1.5 saat. Randevu öncesi tahmini süre bildirilir.
-- Bakım sırasında yanında kalabilir miyim? → Evet, butik stüdyo yapımız buna imkan tanıyor.
-- Köpeğim ne sıklıkla bakıma gelmeli? → Genelde 4–6 haftada bir. Kıvırcık/uzun tüylü ırklar (Poodle, Cocker, Yorkshire vb.) daha sık gerekebilir.
-- Kedim ne sıklıkla tıraş ettirilmeli? → Uzun tüylü ırklarda (İran, Ankara, Maine Coon vb.) özellikle ilkbahar mevsim geçişinde önerilir. Kısa tüylülerde zorunlu değil ama hijyen tıraşı yapılabilir.
-
-[Tıraş & Stil]
-- Makas mı makine mi daha iyi? → Makas daha doğal/estetik, ırk standardına uygun show kalite kesimler için tercih edilir. Makine, tüy dökümü olan veya sıcakta rahatlık isteyen dostlar için uygun. GavgavPet ağırlıklı makas tıraş uyguluyor.
-- Tüyler ne kadar kısa kesilecek? → Tamamen müşteri tercihine ve ırk özelliklerine göre; seans başında birlikte belirlenir.
-- Kedi tıraşı köpekten farklı mı? → Evet, kediler daha hassas/stres eğilimli; seans planı, dokunuş tekniği ve ekipman ayrı. Ayrı zaman dilimi ve ortam ayrılıyor.
-
-[Hassas/Stresli Hayvanlar]
-- Köpeğim hareketli/tedirgin, bakım yapılır mı? → Evet, deneyimli ekip sabır ve teknikle süreci konforlu hale getirir. Anestezi/sedasyon KESİNLİKLE kullanılmaz.
-- Kediler için anestezi kullanıyor musunuz? → Hayır, kesinlikle kullanılmıyor. Tutma ve sakinleştirici tekniklerle yapılıyor. Agresif/sağlık sorunlu kediler için önceden bilgi veriliyor.
-- Kedim banyoyu sevmiyor, ne yapıyorsunuz? → Normal bir durum; nazik teknikler uygulanıyor, gerekirse kuru temizleme yöntemi kullanılabilir.
-
-[Keçelenme & Özel Bakım]
-- Tüyler keçelendi, ne yapılır? → Önce kıtık açıcı krem ve tarama denenir; açılamazsa deri sağlığı için makine tıraş uygulanır, bu randevu öncesi sahibiyle paylaşılır.
-
-[Ürünler & Ek Hizmetler]
-- Hangi ürünleri kullanıyorsunuz? → Dermatolojik test edilmiş, hayvan dostu, vegan sertifikalı şampuan/krem/bakım ürünleri; tüy ve deri yapısına göre seçiliyor.
-- Keratin uygulaması ne sağlar? → Tüylere protein yükler, daha parlak/yumuşak/sağlıklı görünüm sağlar; mat/kırık tüylerde fark yaratır.
-- Yaratıcı renklendirme güvenli mi? → Evet, vegan formüllü ve geçici pet boyaları kullanılıyor; kuyruk/kulak/pati uçlarına uygulanır, cilde temas etmez.
-- Tırnak kesimi tek başına yaptırılabilir mi? → Evet, tırnak kesimi, kulak ve göz temizliği gibi hijyen hizmetleri tam paket olmadan da alınabilir; randevuda belirtmek yeterli.
 
 YANITLAMA FORMATI:
 - Asla * veya ** kullanma (bold, italic, liste işareti olarak).
@@ -62,8 +31,11 @@ YANITLAMA FORMATI:
 GÖREVLERİN (BUNLARA KESİNLİKLE UYACAKSIN):
 1. MEVCUT RANDEVUYU SORGULAMA: Kullanıcı "randevum var mı", "randevu durumum nedir" diyorsa, yani sistemdeki var olan bir randevuyu soruyorsa MUTLAKA checkAppointment tool'unu kullan.
 2. YENİ RANDEVU ALMA (YÖNLENDİRME): Kullanıcı "yeni randevu almak istiyorum", "nasıl randevu alırım" diyorsa KESİNLİKLE tool kullanma. Müşteriye hemen gavgavpet.com sayfasını ziyaret etmesini VEYA +90 536 899 43 74 numaralı WhatsApp hattımıza yazmasını söyle.
-3. SADECE BİLGİ VER: Yukarıdaki SSS ve işletme bilgileri dışındaki sorulara veya fiyat sorularına KESİNLİKLE tahmini, uydurma cevap verme. Bunun yerine şöyle yönlendir: "Bu konudaki en doğru ve güncel bilgiye gavgavpet.com adresimizden veya +90 536 899 43 74 numaralı telefon/WhatsApp hattımızdan ulaşabilirsiniz."
-4. KISA VE PROFESYONEL OL: Yanıtların her zaman kibar, enerjik, profesyonel ve kısa olmalı.`;
+3. SSS/BİLGİ SORULARI: Kullanıcı bakım süreci, tıraş, ürünler, anestezi, keçelenme gibi genel bilgi soruları sorduğunda MUTLAKA searchFAQ tool'unu kullan, kendi bilgine göre tahmini cevap verme.
+4. SADECE BİLGİ VER: Yukarıdaki SSS ve işletme bilgileri dışındaki sorulara veya fiyat sorularına KESİNLİKLE tahmini, uydurma cevap verme. Bunun yerine şöyle yönlendir: "Bu konudaki en doğru ve güncel bilgiye gavgavpet.com adresimizden veya +90 536 899 43 74 numaralı telefon/WhatsApp hattımızdan ulaşabilirsiniz."
+5. KISA VE PROFESYONEL OL: Yanıtların her zaman kibar, enerjik, profesyonel ve kısa olmalı.
+`
+;
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -89,6 +61,7 @@ export async function POST(req: Request) {
               petName: z.string().optional().describe('Evcil hayvanın adı (örn: Mia, Karabaş)'),
               ownerName: z.string().optional().describe('Sahibinin adı (eğer verildiyse)'),
             }),
+            
             execute: async ({ petName, ownerName }) => {
               if (!petName && !ownerName) {
                 return 'Randevu kontrolü için lütfen evcil hayvanınızın adını veya sizin adınızı belirtin.';
@@ -114,6 +87,28 @@ export async function POST(req: Request) {
 
               } catch {
                 return 'Veritabanı sorgusu sırasında bir hata oluştu.';
+              }
+            },
+          }),
+
+          searchFAQ: tool({
+            description: 'GavgavPet\'in bakım süreçleri, hizmetleri, politikaları hakkında sıkça sorulan sorularda bilgi arar. Kullanıcı bakım, tıraş, anestezi, ürünler, fiyat dışı genel bilgi sorduğunda bu tool kullanılır.',
+            inputSchema: z.object({
+              question: z.string().describe('Kullanıcının sorduğu soru veya konu'),
+            }),
+            execute: async ({ question }) => {
+              try {
+                const results = await searchKnowledge(question, 3);
+
+                if (results.length === 0) {
+                  return 'Bu konuda sistemde bilgi bulunamadı.';
+                }
+
+                return results
+                  .map(r => r.content)
+                  .join(' ');
+              } catch {
+                return 'Bilgi tabanı sorgusu sırasında bir hata oluştu.';
               }
             },
           }),

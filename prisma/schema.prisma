@@ -1,12 +1,12 @@
-// This is your Prisma schema file
-
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
 }
 
 model Appointment {
@@ -17,8 +17,7 @@ model Appointment {
   petBreed  String
   date      String
   notes     String?
-  // DÜZELTME: Kod tarafıyla aynı olması için varsayılanı güncelledik
-  status    String   @default("Talep Bekliyor") 
+  status    String   @default("Talep Bekliyor")
   createdAt DateTime @default(now())
 }
 
@@ -28,12 +27,10 @@ model ContactMessage {
   email     String
   subject   String?
   message   String
-  // DÜZELTME: Okunma bilgisi eklendi
-  isRead    Boolean  @default(false) 
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
-// DÜZELTME: Tek bir ayar tablosu kullanacağız (SiteSetting)
 model SiteSetting {
   id           Int    @id @default(1)
   heroVideoUrl String @default("/kopek1video.mp4")
@@ -47,4 +44,14 @@ model Product {
   images      String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model KnowledgeChunk {
+  id        String                       @id @default(cuid())
+  content   String
+  category  String?
+  embedding Unsupported("vector(384)")?
+  createdAt DateTime                     @default(now())
+
+  @@index([embedding])
 }
