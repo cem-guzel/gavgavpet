@@ -4,9 +4,19 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { searchKnowledge } from '@/lib/embeddings';
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
-const SYSTEM_PROMPT = `Sen GavGavPet evcil hayvan kuaförü ve bakım merkezinin resmi yapay zeka asistanısın.
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  const converted = await convertToModelMessages(messages);
+
+  const bugununTarihi = new Date().toLocaleDateString('tr-TR', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  const SYSTEM_PROMPT = `Sen GavGavPet evcil hayvan kuaförü ve bakım merkezinin resmi yapay zeka asistanısın.
+
+BUGÜNÜN TARİHİ: ${bugununTarihi}
 
 ÖNEMLİ KURALLAR:
 - Asla <function> tag'i veya başka format kullanma. Sadece tool_call formatını kullan.
@@ -34,14 +44,9 @@ GÖREVLERİN (BUNLARA KESİNLİKLE UYACAKSIN):
 3. SSS/BİLGİ SORULARI: Kullanıcı bakım süreci, tıraş, ürünler, anestezi, keçelenme gibi genel bilgi soruları sorduğunda MUTLAKA searchFAQ tool'unu kullan, kendi bilgine göre tahmini cevap verme.
 4. SADECE BİLGİ VER: Yukarıdaki SSS ve işletme bilgileri dışındaki sorulara veya fiyat sorularına KESİNLİKLE tahmini, uydurma cevap verme. Bunun yerine şöyle yönlendir: "Bu konudaki en doğru ve güncel bilgiye gavgavpet.com adresimizden veya +90 536 899 43 74 numaralı telefon/WhatsApp hattımızdan ulaşabilirsiniz."
 5. KISA VE PROFESYONEL OL: Yanıtların her zaman kibar, enerjik, profesyonel ve kısa olmalı.
-`
-;
+`;
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-  const converted = await convertToModelMessages(messages);
-
- const models = [
+  const models = [
     groq('qwen/qwen3.6-27b'),       // güncel, tool use destekli
     groq('openai/gpt-oss-120b'),    // yedek 1 - en güçlü
     groq('openai/gpt-oss-20b'),     // yedek 2
