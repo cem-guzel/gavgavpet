@@ -69,7 +69,7 @@ export default function ContactFAB() {
       {/* ── Chat Paneli ── */}
       <div
         className={`
-          fixed z-[998]
+          fixed z-[1000]
           bottom-[96px] right-6 
           md:bottom-[120px] md:right-10
           flex w-[92vw] max-w-sm flex-col overflow-hidden
@@ -206,6 +206,10 @@ export default function ContactFAB() {
           />
           <button
             type="submit"
+            onClick={(e) => {
+              e.preventDefault(); 
+              submitText(input);  
+            }}
             disabled={isLoading || !input.trim()}
             aria-label="Gönder"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rich-black text-paper transition hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
