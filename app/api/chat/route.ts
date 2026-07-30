@@ -3,6 +3,8 @@ import { streamText, tool, convertToModelMessages, stepCountIs } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { searchKnowledge } from '@/lib/embeddings';
+import { checkAppointment } from '@/lib/appointments/checkAppointment';
+import { searchFAQ } from '@/lib/faq/searchFAQ';
 
 export const maxDuration = 60;
 
@@ -86,32 +88,8 @@ GÖREVLERİN (BUNLARA KESİNLİKLE UYACAKSIN):
               ownerName: z.string().optional().describe('Sahibinin adı (eğer verildiyse)'),
             }),
             
-            execute: async ({ petName, ownerName }) => {
-              if (!petName && !ownerName) {
-                return 'Randevu kontrolü için lütfen evcil hayvanınızın adını veya sizin adınızı belirtin.';
-              }
-              try {
-                const conditions = [];
-                if (petName) conditions.push({ petName: { contains: petName, mode: 'insensitive' as const } });
-                if (ownerName) conditions.push({ ownerName: { contains: ownerName, mode: 'insensitive' as const } });
-
-                const appointments = await prisma.appointment.findMany({
-                  where: { OR: conditions },
-                  orderBy: { createdAt: 'desc' },
-                  take: 3,
-                });
-
-                if (appointments.length === 0) {
-                  return 'Sistemde eşleşen bir randevu bulunamadı.';
-                }
-
-                return appointments.map(app =>
-                  `[Evcil Hayvan: ${app.petName}, Sahibi: ${app.ownerName}, Tarih: ${new Date(app.date).toLocaleDateString('tr-TR')}, Durum: ${app.status}, Not: ${app.notes || 'Yok'}]`
-                ).join(' | ');
-
-              } catch {
-                return 'Veritabanı sorgusu sırasında bir hata oluştu.';
-              }
+           execute: async ({ petName, ownerName }) => {
+              return checkAppointment({ petName, ownerName });
             },
           }),
 
@@ -120,20 +98,8 @@ GÖREVLERİN (BUNLARA KESİNLİKLE UYACAKSIN):
             inputSchema: z.object({
               question: z.string().describe('Kullanıcının sorduğu soru veya konu'),
             }),
-            execute: async ({ question }) => {
-              try {
-                const results = await searchKnowledge(question, 3);
-
-                if (results.length === 0) {
-                  return 'Bu konuda sistemde bilgi bulunamadı.';
-                }
-
-                return results
-                  .map(r => r.content)
-                  .join(' ');
-              } catch {
-                return 'Bilgi tabanı sorgusu sırasında bir hata oluştu.';
-              }
+           execute: async ({ question }) => {
+              return searchFAQ(question);
             },
           }),
         },

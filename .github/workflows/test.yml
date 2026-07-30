@@ -1,0 +1,28 @@
+name: Testleri Çalıştır
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu indir
+        uses: actions/checkout@v4
+
+      - name: Node.js kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Bağımlılıkları kur
+        run: npm ci
+
+      - name: Vitest testlerini çalıştır
+        run: npx vitest run

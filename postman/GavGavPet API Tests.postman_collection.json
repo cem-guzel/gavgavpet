@@ -1,0 +1,253 @@
+{
+  "info": {
+    "_postman_id": "52ab0fd1-2079-42a8-babb-2e19ba18b3b5",
+    "name": "GavGavPet API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32668226"
+  },
+  "item": [
+    {
+      "name": "POST /appointments - Başarılı senaryo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code 200 dönmeli\", () => {\r",
+              "  pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Dönen randevu doğru petName içermeli\", () => {\r",
+              "  const body = pm.response.json();\r",
+              "  pm.expect(body.petName).to.eql(\"Karabaş\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"ownerName\": \"Ahmet Yılmaz\",\r\n  \"phone\": \"+905368994374\",\r\n  \"petName\": \"Karabaş\",\r\n  \"petBreed\": \"Golden Retriever\",\r\n  \"date\": \"2026-08-20\",\r\n  \"notes\": \"İlk kez geliyoruz\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/appointments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "appointments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /appointments - Eksik ownerName",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Eksik ownerName ile şu an 500 dönüyor (bilinen bug)\", () => {\r",
+              "  pm.response.to.have.status(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Hata mesajı doğru formatta dönmeli\", () => {\r",
+              "  const body = pm.response.json();\r",
+              "  pm.expect(body.error).to.eql(\"Randevu kaydedilemedi\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"phone\": \"+905368994374\",\r\n  \"petName\": \"Karabaş\",\r\n  \"petBreed\": \"Golden Retriever\",\r\n  \"date\": \"2026-08-20\",\r\n  \"notes\": \"İlk kez geliyoruz\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/appointments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "appointments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /appointments - Geçersiz tarih",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Geçersiz tarih formatında status 500 dönmeli\", () => {\r",
+              "  pm.response.to.have.status(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Geçersiz tarih formatında hata mesajı doğru olmalı\", () => {\r",
+              "  const body = pm.response.json();\r",
+              "  pm.expect(body.error).to.eql(\"Randevu kaydedilemedi\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"ownerName\": \"Test Kullanıcı\",\r\n  \"phone\": \"+905368994374\",\r\n  \"petName\": \"Test Pet\",\r\n  \"petBreed\": \"Test Breed\",\r\n  \"date\": \"bu-bir-tarih-degil\",\r\n  \"notes\": \"Test notu\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/appointments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "appointments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /appointments - Boş body",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Boş body formatında status 500 dönmeli\", () => {\r",
+              "  pm.response.to.have.status(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Boş body formatında hata mesajı doğru olmalı\", () => {\r",
+              "  const body = pm.response.json();\r",
+              "  pm.expect(body.error).to.eql(\"Randevu kaydedilemedi\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/appointments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "appointments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /appointments - Fazladan alan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Fazla body formatında status 200 dönmeli\", () => {\r",
+              "  pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Fazla body formatında beklenmeyen alanlar response'a sızmamalı\", () => {\r",
+              "  const body = pm.response.json();\r",
+              "  pm.expect(body.extraField).to.be.undefined;\r",
+              "  pm.expect(body.isAdmin).to.be.undefined;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"ownerName\": \"Test Kullanıcı\",\r\n  \"phone\": \"+905368994374\",\r\n  \"petName\": \"Test Pet\",\r\n  \"petBreed\": \"Test Breed\",\r\n  \"date\": \"2026-08-20\",\r\n  \"notes\": \"Test notu\",\r\n  \"extraField\": \"bu alan şemada yok\",\r\n  \"isAdmin\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/appointments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "appointments"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
