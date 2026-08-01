@@ -1,6 +1,5 @@
-# GavGavPet
 
-İstanbul'da bir evcil hayvan kuaförü stüdyosu için geliştirilmiş, yapay zeka destekli müşteri asistanı içeren tam kapsamlı bir web platformu.
+Yapay zeka destekli müşteri asistanı içeren tam kapsamlı bir web platformu.
 
 ## Özellikler
 
